@@ -1,7 +1,7 @@
 package ch.makery.address
 
 import ch.makery.address.model.Person
-import ch.makery.address.view.PersonEditDialogController
+import ch.makery.address.view.{PersonEditDialogController, PersonOverviewController}
 import javafx.fxml.FXMLLoader
 import scalafx.application.JFXApp3
 import scalafx.application.JFXApp3.PrimaryStage
@@ -10,13 +10,15 @@ import scalafx.Includes.*
 import javafx.scene as jfxs
 import scalafx.collections.ObservableBuffer
 import scalafx.beans.property.StringProperty
+import scalafx.scene.image.Image
 import scalafx.stage.{Modality, Stage}
 
 object MainApp extends JFXApp3:
 
   //Window Root Pane
   var roots: Option[scalafx.scene.layout.BorderPane] = None
-
+  var cssResource = getClass.getResource("view/DarkTheme.css")
+  var personOverviewController: Option[PersonOverviewController] = None
   val personData = new ObservableBuffer[Person]()
 
   /**
@@ -46,14 +48,25 @@ object MainApp extends JFXApp3:
 
     stage = new PrimaryStage():
       title = "AddressApp"
+      icons += new Image(getClass.getResource("/images/psyduck.png").toExternalForm)
       scene = new Scene():
+        stylesheets = Seq(cssResource.toExternalForm)
         root = roots.get
 
     // call to display PersonOverview when app start
-    showPersonOverview()
+    showWelcome()
   // actions for display person overview window
   def showPersonOverview(): Unit =
     val resource = getClass.getResource("view/PersonOverview.fxml")
+    val loader = new FXMLLoader(resource)
+    loader.load()
+    val roots = loader.getRoot[jfxs.layout.AnchorPane]
+    personOverviewController = Option(loader.getController[PersonOverviewController])
+
+    this.roots.get.center = roots
+
+  def showWelcome(): Unit =
+    val resource = getClass.getResource("view/Welcome.fxml")
     val loader = new FXMLLoader(resource)
     loader.load()
     val roots = loader.getRoot[jfxs.layout.AnchorPane]
@@ -70,6 +83,7 @@ object MainApp extends JFXApp3:
       initModality(Modality.ApplicationModal)
       initOwner(stage)
       scene = new Scene:
+        stylesheets = Seq(cssResource.toExternalForm)
         root = roots2
 
     control.dialogStage = dialog
